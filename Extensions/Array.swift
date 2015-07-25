@@ -17,4 +17,5 @@ extension Array {
 		// Cribbed from StackOverflow
 		return indices ~= index ? self[index] : nil
 	}
+	
 }
