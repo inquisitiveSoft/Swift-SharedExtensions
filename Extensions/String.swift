@@ -70,4 +70,14 @@ extension String {
 	func localized(comment: String = "") -> String {
 		return NSLocalizedString(self, comment: comment)
 	}
+
+
+	func stringByAppendingPathComponent(component: String) -> String {
+		return (self as NSString).stringByAppendingPathComponent(component)
+	}
+	
+	
+	func stringByAppendingPathComponents(components: [String]) -> String {
+		return components.reduce(self) { ($0 as NSString).stringByAppendingPathComponent($1) }
+	}
 }
