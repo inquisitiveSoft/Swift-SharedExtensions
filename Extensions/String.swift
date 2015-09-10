@@ -84,7 +84,6 @@ extension String {
 			combinedIdentifierCharacterSet.formUnionWithCharacterSet(characterSet)
 		}
 		
-		
 		numberOfIdentifierCharacters += numberOfCharactersInCharacterSet(combinedIdentifierCharacterSet, minimumRun: 5)
 		let stringLength = self.characters.count
 		
