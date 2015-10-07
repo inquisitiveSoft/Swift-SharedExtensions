@@ -44,6 +44,34 @@ extension String {
 	}
 	
 	
+	func numberOfSentences() -> UInt {
+		var numberOfSentences: UInt = 0
+		let searchRange = self.startIndex..<self.endIndex
+		
+		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.BySentences, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
+			numberOfSentences++
+		}
+		
+		return numberOfSentences
+	}
+	
+	
+	func numberOfParagraphs() -> UInt {
+		var numberOfParagraphs: UInt = 0
+		let searchRange = self.startIndex..<self.endIndex
+		
+		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.ByParagraphs, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
+			numberOfParagraphs++
+		}
+		
+		return numberOfParagraphs
+	}
+	
+	
+	func numberOfCharacters() -> UInt {
+		return UInt(self.characters.count)
+	}
+	
 
 	func numberOfDecimalCharacters() -> Int {
 		return numberOfCharactersInCharacterSet(NSCharacterSet.decimalDigitCharacterSet())
