@@ -18,6 +18,7 @@ class IntervalThreshold {
 	
 	
 	func perform() {
+		// Convoluted logics
 		if !withinThresholdInterval, let actionBlock = actionBlock {
 			shouldPerformAction = false
 			withinThresholdInterval = true
@@ -25,7 +26,7 @@ class IntervalThreshold {
 			actionBlock()
 			
 			let interval = dispatch_time(DISPATCH_TIME_NOW, Int64(intervalBetweenCalls * Double(NSEC_PER_SEC)))
-			dispatch_after(interval, actionQueue) {
+			dispatch_after(interval, actionQueue) { [unowned self] in
 				self.withinThresholdInterval = false
 				
 				if self.shouldPerformAction {
