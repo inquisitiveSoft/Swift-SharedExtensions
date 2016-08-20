@@ -37,7 +37,7 @@ extension String {
 		let searchRange = self.startIndex..<self.endIndex
 		
 		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.ByWords, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
-			numberOfWords++
+			numberOfWords += 1
 		}
 		
 		return numberOfWords
@@ -49,7 +49,7 @@ extension String {
 		let searchRange = self.startIndex..<self.endIndex
 		
 		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.BySentences, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
-			numberOfSentences++
+			numberOfSentences += 1
 		}
 		
 		return numberOfSentences
@@ -61,7 +61,7 @@ extension String {
 		let searchRange = self.startIndex..<self.endIndex
 		
 		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.ByParagraphs, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
-			numberOfParagraphs++
+			numberOfParagraphs += 1
 		}
 		
 		return numberOfParagraphs
