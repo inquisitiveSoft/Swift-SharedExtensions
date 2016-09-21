@@ -9,180 +9,168 @@
 import Foundation
 
 
-infix operator =~ {}
+infix operator =~
 
 
 internal func =~ (string: String, pattern: String) -> Bool {
-	do {
-		let regex = try NSRegularExpression(pattern: pattern, options: NSRegularExpressionOptions.DotMatchesLineSeparators)
-		let matches = regex.numberOfMatchesInString(string, options: [], range:NSRangeOfString(string))
-		return matches > 0
-	} catch {}
-	
-	return false
+    do {
+        let regex = try NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators)
+        let matches = regex.numberOfMatches(in: string, options: [], range:NSRangeOfString(string: string as NSString))
+        return matches > 0
+    } catch {}
+    
+    return false
 }
 
 
 
 func NSRangeOfString(string: NSString!) -> NSRange {
-	let range = NSRange(location: 0, length:string.length)
-	return range
+    let range = NSRange(location: 0, length:string.length)
+    return range
 }
 
 
 extension String {
-	
-	func numberOfWords() -> UInt {
-		var numberOfWords: UInt = 0
-		let searchRange = self.startIndex..<self.endIndex
-		
-		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.ByWords, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
-			numberOfWords += 1
-		}
-		
-		return numberOfWords
-	}
-	
-	
-	func numberOfSentences() -> UInt {
-		var numberOfSentences: UInt = 0
-		let searchRange = self.startIndex..<self.endIndex
-		
-		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.BySentences, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
-			numberOfSentences += 1
-		}
-		
-		return numberOfSentences
-	}
-	
-	
-	func numberOfParagraphs() -> UInt {
-		var numberOfParagraphs: UInt = 0
-		let searchRange = self.startIndex..<self.endIndex
-		
-		self.enumerateSubstringsInRange(searchRange, options: [NSStringEnumerationOptions.ByParagraphs, NSStringEnumerationOptions.SubstringNotRequired]) { (_, _, _, _) -> () in
-			numberOfParagraphs += 1
-		}
-		
-		return numberOfParagraphs
-	}
-	
-	
-	func numberOfCharacters() -> UInt {
-		return UInt(self.characters.count)
-	}
-	
+    
+    var numberOfWords: UInt {
+        var numberOfWords: UInt = 0
+        let searchRange = self.startIndex..<self.endIndex
+        
+        self.enumerateSubstrings(in: searchRange, options: .byWords) { (_, _, _, _) in
+            numberOfWords += 1
+        }
+        
+        return numberOfWords
+    }
+    
+    
+    var numberOfSentences: UInt {
+        var numberOfSentences: UInt = 0
+        let searchRange = self.startIndex..<self.endIndex
+        
+        self.enumerateSubstrings(in: searchRange, options: [.bySentences, .substringNotRequired]) { (_, _, _, _) -> () in
+            numberOfSentences += 1
+        }
+        
+        return numberOfSentences
+    }
+    
+    
+    var numberOfParagraphs: UInt {
+        var numberOfParagraphs: UInt = 0
+        let searchRange = self.startIndex..<self.endIndex
+        
+        self.enumerateSubstrings(in: searchRange, options: [.byParagraphs, .substringNotRequired]) { (_, _, _, _) -> () in
+            numberOfParagraphs += 1
+        }
+        
+        return numberOfParagraphs
+    }
+    
+    
+    var numberOfCharacters: UInt {
+        return UInt(self.characters.count)
+    }
+    
+    
+    var numberOfDecimalCharacters: Int {
+        return numberOfCharacters(in: .decimalDigits)
+    }
+    
+    
+    func numberOfCharacters(in characterSet: CharacterSet, minimumRun: Int = 0) -> Int {
+        var numberOfMatchingCharacters = 0
+        let scanner = Scanner(string: self)
+        
+        repeat {
+            scanner.scanUpToCharacters(from: characterSet, into: nil)
+            
+            var matchingString: NSString? = nil
+            
+            if !scanner.isAtEnd && scanner.scanCharacters(from: characterSet, into: &matchingString), let matchingString = matchingString {
+                numberOfMatchingCharacters += matchingString.length
+            }
+        } while (!scanner.isAtEnd)
+        
+        return numberOfMatchingCharacters
+    }
+    
+    
+    var looksLikeAnIdentifier: Bool {
+        let knownPrefixes = ["text-"]
+        var numberOfIdentifierCharacters = knownPrefixes.filter { self.hasPrefix($0) }.reduce(0) { $0 + $1.characters.count }
+        
+        let identifierCharacterSets: [CharacterSet] = [
+            CharacterSet.decimalDigits,
+            CharacterSet(charactersIn: "–-_"),
+            CharacterSet.uppercaseLetters
+        ]
+        
+        var combinedIdentifierCharacterSet = CharacterSet()
+        
+        for characterSet in identifierCharacterSets {
+            combinedIdentifierCharacterSet.formUnion(characterSet)
+        }
+        
+        numberOfIdentifierCharacters += self.numberOfCharacters(in: combinedIdentifierCharacterSet, minimumRun: 5)
+        let stringLength = self.characters.count
+        
+        if (stringLength > 0) && (numberOfIdentifierCharacters > 0) && (Double(numberOfIdentifierCharacters) / Double(stringLength) > 0.55) {
+            return true
+        }
+        
+        return false
+    }
+    
+    
+    func firstLine(upToCharacter desiredNumberOfCharacters: Int) -> String {
+        var numberOfCharacters = 0
+        var desiredRange: Range = startIndex..<endIndex
+        
+        enumerateLines { (line, stop) -> () in
+            if !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                line.enumerateSubstrings(in: line.startIndex..<line.endIndex, options: [.byWords]) { (substring, _, enclosingRange, stopInternal) -> () in
+                    desiredRange = line.startIndex..<enclosingRange.upperBound
+                    numberOfCharacters += substring?.characters.count ?? 0
+                    
+                    if numberOfCharacters >= desiredNumberOfCharacters {
+                        stopInternal = true
+                    }
+                }
+                
+                stop = true
+            }
+        }
+        
+        let resultingString = self.substring(with: desiredRange).trimmingCharacters(in: .whitespacesAndNewlines)
+        return resultingString
+    }
 
-	func numberOfDecimalCharacters() -> Int {
-		return numberOfCharactersInCharacterSet(NSCharacterSet.decimalDigitCharacterSet())
-	}
-
-	
-	func numberOfCharactersInCharacterSet(characterSet: NSCharacterSet, minimumRun: Int = 0) -> Int {
-		var numberOfMatchingCharacters = 0
-		let scanner = NSScanner(string: self)
-		
-		repeat {
-			scanner.scanUpToCharactersFromSet(characterSet, intoString: nil)
-			
-			var matchingString: NSString? = nil
-			
-			if !scanner.atEnd && scanner.scanCharactersFromSet(characterSet, intoString: &matchingString), let matchingString = matchingString {
-				numberOfMatchingCharacters += matchingString.length
-			}
-		} while (!scanner.atEnd)
-		
-		return numberOfMatchingCharacters
-	}
-	
-	
-	var looksLikeAnIdentifier: Bool {
-		let knownPrefixes = ["text-"]
-		var numberOfIdentifierCharacters = knownPrefixes.filter { self.hasPrefix($0) }.reduce(0) { $0 + $1.characters.count }
-		
-		let identifierCharacterSets = [
-			NSCharacterSet.decimalDigitCharacterSet(),
-			NSCharacterSet(charactersInString: "–-_"),
-			NSCharacterSet.uppercaseLetterCharacterSet()
-		]
-		
-		let combinedIdentifierCharacterSet = NSMutableCharacterSet()
-		
-		for characterSet in identifierCharacterSets {
-			combinedIdentifierCharacterSet.formUnionWithCharacterSet(characterSet)
-		}
-		
-		numberOfIdentifierCharacters += numberOfCharactersInCharacterSet(combinedIdentifierCharacterSet, minimumRun: 5)
-		let stringLength = self.characters.count
-		
-		if (stringLength > 0) && (numberOfIdentifierCharacters > 0) && (Double(numberOfIdentifierCharacters) / Double(stringLength) > 0.55) {
-			return true
-		}
-		
-		return false
-	}
-	
-	
-	func firstLineUpToCharacterCount(desiredNumberOfCharacters: Int) -> String {
-		var numberOfCharacters = 0
-		var desiredRange: Range = startIndex..<endIndex
-		let whitespaceCharacterSet = NSCharacterSet.whitespaceAndNewlineCharacterSet()
-		
-		enumerateLines { (line, stop) -> () in
-			if !line.stringByTrimmingCharactersInSet(whitespaceCharacterSet).isEmpty {
-				line.enumerateSubstringsInRange(line.startIndex..<line.endIndex, options: [NSStringEnumerationOptions.ByWords]) { (substring, _, enclosingRange, stopInternal) -> () in
-					desiredRange = line.startIndex..<enclosingRange.endIndex
-					numberOfCharacters += substring?.characters.count ?? 0
-					
-					if numberOfCharacters >= desiredNumberOfCharacters {
-						stopInternal = true
-					}
-				}
-				
-				stop = true
-			}
-		}
-		
-		let resultingString = substringWithRange(desiredRange).stringByTrimmingCharactersInSet(whitespaceCharacterSet)
-		return resultingString
-	}
-	
-	
-	
-	func substringForUntestedRange(range: NSRange) -> String? {
-		let text = self as NSString
-		let textRange = NSRangeOfString(text)
-		
-		let validRange = NSIntersectionRange(textRange, range)
-		
-		if validRange.length > 0 {
-			return text.substringWithRange(validRange)
-		}
-		
-		return nil
-	}
-	
-	
-	// MARK: String localization
-	
-	var localized: String {
-		get {
-			return localized()
-		}
-	}
-	
-	
-	func localized(comment: String = "") -> String {
-		return NSLocalizedString(self, comment: comment)
-	}
-
-
-	func stringByAppendingPathComponent(component: String) -> String {
-		return (self as NSString).stringByAppendingPathComponent(component)
-	}
-	
-	
-	func stringByAppendingPathComponents(components: [String]) -> String {
-		return components.reduce(self) { ($0 as NSString).stringByAppendingPathComponent($1) }
-	}
+    
+    func substringForUntestedRange(range: NSRange) -> String? {
+        let text = self as NSString
+        let textRange = NSRangeOfString(string: text)
+        
+        let validRange = NSIntersectionRange(textRange, range)
+        
+        if validRange.length > 0 {
+            return text.substring(with: validRange)
+        }
+        
+        return nil
+    }
+    
+    
+    // MARK: String localization
+    
+    var localized: String {
+        get {
+            return localized()
+        }
+    }
+    
+    
+    func localized(comment: String = "") -> String {
+        return NSLocalizedString(self, comment: comment)
+    }
 }
