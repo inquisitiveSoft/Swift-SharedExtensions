@@ -10,6 +10,6 @@ import Foundation
 
 
 
-func catchExceptions(block: () -> Void, error exceptionHandlingBlock: TryExceptionBlock?) {
+func catchExceptions(_ block: @escaping () -> Void, error exceptionHandlingBlock: TryExceptionBlock?) {
 	try_block(block, exceptionHandlingBlock)
 }

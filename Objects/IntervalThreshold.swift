@@ -9,9 +9,9 @@ import UIKit
 
 
 class IntervalThreshold {
-	var intervalBetweenCalls: NSTimeInterval = 1.0 / 30.0
+	var intervalBetweenCalls: TimeInterval = 1.0 / 30.0
 	var actionBlock: (() -> ())?
-	var actionQueue: dispatch_queue_t = dispatch_get_main_queue()
+	var actionQueue: DispatchQueue = DispatchQueue.main
 	
 	var shouldPerformAction: Bool = false
 	var withinThresholdInterval: Bool = false
@@ -25,8 +25,8 @@ class IntervalThreshold {
 			
 			actionBlock()
 			
-			let interval = dispatch_time(DISPATCH_TIME_NOW, Int64(intervalBetweenCalls * Double(NSEC_PER_SEC)))
-			dispatch_after(interval, actionQueue) { [unowned self] in
+			let interval = DispatchTime.now() + Double(Int64(intervalBetweenCalls * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+			actionQueue.asyncAfter(deadline: interval) { [unowned self] in
 				self.withinThresholdInterval = false
 				
 				if self.shouldPerformAction {
