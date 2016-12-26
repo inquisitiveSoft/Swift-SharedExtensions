@@ -19,3 +19,22 @@ extension Array {
 	}
 	
 }
+
+
+extension Sequence where Iterator.Element == String {
+    
+    func contains(_ inputString: String, options: String.CompareOptions, compareFileExtensions: Bool = true) -> Bool {
+        let searchString = compareFileExtensions ? inputString : (inputString as NSString).deletingPathExtension
+        
+        for element in self {
+            let stringForComparison = compareFileExtensions ? element : (element as NSString).deletingPathExtension
+            
+            if searchString.compare(stringForComparison, options: options) == .orderedSame {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+}
