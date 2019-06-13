@@ -8,29 +8,22 @@
 
 import Foundation
 
-
-infix operator =~
-
-
-internal func =~ (string: String, pattern: String) -> Bool {
-    do {
-        let regex = try NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators)
-        let matches = regex.numberOfMatches(in: string, options: [], range:NSRangeOfString(string: string as NSString))
-        return matches > 0
-    } catch {}
-    
-    return false
-}
-
-
-
 func NSRangeOfString(string: NSString!) -> NSRange {
     let range = NSRange(location: 0, length:string.length)
     return range
 }
 
-
 extension String {
+
+    func isMatchedBy(_ pattern: String) -> Bool {
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators)
+            let matches = regex.numberOfMatches(in: self, options: [], range: NSRangeOfString(string: self as NSString))
+            return matches > 0
+        } catch {}
+
+        return false
+    }
     
     var numberOfWords: UInt {
         var numberOfWords: UInt = 0
