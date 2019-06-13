@@ -135,7 +135,7 @@ extension String {
             }
         }
         
-        let resultingString = self.substring(with: desiredRange).trimmingCharacters(in: .whitespacesAndNewlines)
+        let resultingString = self[desiredRange].trimmingCharacters(in: .whitespacesAndNewlines)
         return resultingString
     }
 
