@@ -62,7 +62,7 @@ extension String {
     
     
     var numberOfCharacters: UInt {
-        return UInt(self.characters.count)
+        return UInt(count)
     }
     
     
@@ -91,7 +91,7 @@ extension String {
     
     var looksLikeAnIdentifier: Bool {
         let knownPrefixes = ["text-"]
-        var numberOfIdentifierCharacters = knownPrefixes.filter { self.hasPrefix($0) }.reduce(0) { $0 + $1.characters.count }
+        var numberOfIdentifierCharacters = knownPrefixes.filter { self.hasPrefix($0) }.reduce(0) { $0 + $1.count }
         
         let identifierCharacterSets: [CharacterSet] = [
             CharacterSet.decimalDigits,
@@ -106,7 +106,7 @@ extension String {
         }
         
         numberOfIdentifierCharacters += self.numberOfCharacters(in: combinedIdentifierCharacterSet, minimumRun: 5)
-        let stringLength = self.characters.count
+        let stringLength = self.count
         
         if (stringLength > 0) && (numberOfIdentifierCharacters > 0) && (Double(numberOfIdentifierCharacters) / Double(stringLength) > 0.55) {
             return true
@@ -124,7 +124,7 @@ extension String {
             if !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 line.enumerateSubstrings(in: line.startIndex..<line.endIndex, options: [.byWords]) { (substring, _, enclosingRange, stopInternal) -> () in
                     desiredRange = line.startIndex..<enclosingRange.upperBound
-                    numberOfCharacters += substring?.characters.count ?? 0
+                    numberOfCharacters += substring?.count ?? 0
                     
                     if numberOfCharacters >= desiredNumberOfCharacters {
                         stopInternal = true
